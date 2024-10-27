@@ -3,6 +3,7 @@ package com.jogo.cucaracha;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -21,6 +22,7 @@ public class Main extends ApplicationAdapter {
     private Texture tela_fase_fundo_textura;
     private Texture inimigo_textura;
     private Texture jogador_textura;
+    private Texture disparo_textura;
 
     public Vector2 jogador_temp_movimento;
 
@@ -30,8 +32,10 @@ public class Main extends ApplicationAdapter {
     public int contador = 1;
 
     public float inimigo_tempo_geracao;
+    public float disparo_tempo_geracao;
 
     public Array<Sprite> inimigo_lista;
+    public Array<Sprite> disparo_lista;
 
     @Override
     public void create() {
@@ -45,6 +49,9 @@ public class Main extends ApplicationAdapter {
         jogador_textura = new Texture("Jogador/img_textura.png");
         jogador_personagem = new Jogador(jogador_textura);
         jogador_temp_movimento = new Vector2(11, 0);
+
+        disparo_textura = new Texture("Jogador/img_disparo.png");
+        disparo_lista =  new Array<>();
     }
 
     @Override
@@ -64,6 +71,24 @@ public class Main extends ApplicationAdapter {
 
     public void logica(){
         float delta = Gdx.graphics.getDeltaTime();
+        float disparo_delta = Gdx.graphics.getDeltaTime();
+
+        for (int i = disparo_lista.size - 1; i >= 0; i--) {
+            Sprite disparo_movimento = disparo_lista.get(i);
+            float disparo_movimento_largura = disparo_movimento.getWidth();
+
+            disparo_movimento.translateX(250f * delta);
+
+            if (disparo_movimento.getX() > (disparo_movimento_largura + 1440)) {
+                disparo_lista.removeIndex(i);
+            }
+        }
+
+        disparo_tempo_geracao += disparo_delta;
+        if (disparo_tempo_geracao > 1.5f){
+            disparo_tempo_geracao = 0;
+            disparoGeracao();
+        }
 
         if(Gdx.input.isKeyJustPressed(Keys.UP)) {
             contador++;
@@ -85,7 +110,6 @@ public class Main extends ApplicationAdapter {
        for (int i = inimigo_lista.size - 1; i >= 0; i--) {
            Sprite inimigo_movimento = inimigo_lista.get(i);
            float inimigo_movimento_largura = inimigo_movimento.getWidth();
-           float inimigo_altura = inimigo_movimento.getHeight();
 
            inimigo_movimento.translateX(-100f * delta);
 
@@ -107,10 +131,14 @@ public class Main extends ApplicationAdapter {
         batch.begin();
         batch.draw(tela_fase_fundo_textura, 0, 0);
         batch.draw(jogador_personagem.getTextura(), jogador_temp_movimento.x, jogador_temp_movimento.y);
+
+        for (Sprite disparo_desenho : disparo_lista) {
+            disparo_desenho.draw(batch);
+        }
+
         for (Sprite inimigo_desenho : inimigo_lista) {
             inimigo_desenho.draw(batch);
         }
-
         batch.end();
     }
 
@@ -129,5 +157,12 @@ public class Main extends ApplicationAdapter {
             inimigo.setX(1500);
         }
         inimigo_lista.add(inimigo);
+    }
+
+    public void disparoGeracao(){
+        Sprite disparo = new Sprite(disparo_textura);
+        disparo.setX(jogador_temp_movimento.x + 35);
+        disparo.setY(jogador_temp_movimento.y + 40);
+        disparo_lista.add(disparo);
     }
 }
