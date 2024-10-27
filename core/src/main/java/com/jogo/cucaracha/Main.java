@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -25,6 +26,7 @@ public class Main extends ApplicationAdapter {
     private Texture disparo_textura;
 
     public Vector2 jogador_temp_movimento;
+    public Vector2 disparo_movimento;
 
     public Jogador jogador_personagem;
 
@@ -36,6 +38,11 @@ public class Main extends ApplicationAdapter {
 
     public Array<Sprite> inimigo_lista;
     public Array<Sprite> disparo_lista;
+
+    Rectangle inimigo_retangulo;
+    Rectangle disparo_retangulo;
+
+    boolean disparo_verifcacao;
 
     @Override
     public void create() {
@@ -52,6 +59,8 @@ public class Main extends ApplicationAdapter {
 
         disparo_textura = new Texture("Jogador/img_disparo.png");
         disparo_lista =  new Array<>();
+        disparo_verifcacao = false;
+        disparo_movimento = new Vector2(0, 0);
     }
 
     @Override
@@ -71,24 +80,6 @@ public class Main extends ApplicationAdapter {
 
     public void logica(){
         float delta = Gdx.graphics.getDeltaTime();
-        float disparo_delta = Gdx.graphics.getDeltaTime();
-
-        for (int i = disparo_lista.size - 1; i >= 0; i--) {
-            Sprite disparo_movimento = disparo_lista.get(i);
-            float disparo_movimento_largura = disparo_movimento.getWidth();
-
-            disparo_movimento.translateX(250f * delta);
-
-            if (disparo_movimento.getX() > (disparo_movimento_largura + 1440)) {
-                disparo_lista.removeIndex(i);
-            }
-        }
-
-        disparo_tempo_geracao += disparo_delta;
-        if (disparo_tempo_geracao > 1.5f){
-            disparo_tempo_geracao = 0;
-            disparoGeracao();
-        }
 
         if(Gdx.input.isKeyJustPressed(Keys.UP)) {
             contador++;
@@ -104,7 +95,32 @@ public class Main extends ApplicationAdapter {
                 contador = 1;
             }
             jogador_temp_movimento = jogador_personagem.jogadorPersonagemMovimento(contador);
+        }
 
+
+        disparo_tempo_geracao += delta;
+        if (disparo_tempo_geracao > 0.5f){
+            disparo_tempo_geracao = 0;
+            if(!disparo_verifcacao) {
+                if (contador == 1) {
+                    disparo_movimento.x = 30;
+                    disparo_movimento.y = 40;
+                    disparo_verifcacao = true;
+                } else if (contador == 2) {
+                    disparo_movimento.x = 50;
+                    disparo_movimento.y = 130;
+                    disparo_verifcacao = true;
+                } else if (contador == 3) {
+                    disparo_movimento.x = 50;
+                    disparo_movimento.y = 235;
+                    disparo_verifcacao = true;
+                }
+            }
+        }
+
+        if (disparo_verifcacao){
+            disparo_movimento.x += 250 * delta;
+            disparo_retangulo = new Rectangle(disparo_movimento.x, disparo_movimento.y, disparo_textura.getWidth(), disparo_textura.getHeight());
         }
 
        for (int i = inimigo_lista.size - 1; i >= 0; i--) {
@@ -112,9 +128,17 @@ public class Main extends ApplicationAdapter {
            float inimigo_movimento_largura = inimigo_movimento.getWidth();
 
            inimigo_movimento.translateX(-100f * delta);
+           inimigo_retangulo = new Rectangle(inimigo_movimento.getX(), inimigo_movimento.getY(), inimigo_textura.getWidth(), inimigo_textura.getHeight());
 
            if (inimigo_movimento.getX() < -inimigo_movimento_largura) {
                inimigo_lista.removeIndex(i);
+           }
+
+           if (disparo_verifcacao){
+               if (disparo_retangulo.overlaps(inimigo_retangulo)) {
+                   inimigo_lista.removeIndex(i);
+                   disparo_verifcacao = false;
+               }
            }
        }
 
@@ -131,9 +155,8 @@ public class Main extends ApplicationAdapter {
         batch.begin();
         batch.draw(tela_fase_fundo_textura, 0, 0);
         batch.draw(jogador_personagem.getTextura(), jogador_temp_movimento.x, jogador_temp_movimento.y);
-
-        for (Sprite disparo_desenho : disparo_lista) {
-            disparo_desenho.draw(batch);
+        if (disparo_verifcacao){
+            batch.draw(disparo_textura, disparo_movimento.x, disparo_movimento.y);
         }
 
         for (Sprite inimigo_desenho : inimigo_lista) {
@@ -151,18 +174,38 @@ public class Main extends ApplicationAdapter {
         } else if (escolha == 2) {
             inimigo.setY(100);
             inimigo.setX(1500);
-        }
-        else if (escolha == 3) {
+        } else if (escolha == 3) {
             inimigo.setY(200);
             inimigo.setX(1500);
         }
         inimigo_lista.add(inimigo);
     }
 
-    public void disparoGeracao(){
+    /*public void disparoGeracao(){
         Sprite disparo = new Sprite(disparo_textura);
-        disparo.setX(jogador_temp_movimento.x + 35);
-        disparo.setY(jogador_temp_movimento.y + 40);
+
+        if (!disparo_verifcacao){
+            if (contador == 1){
+                disparo.setY(15);
+                disparo.setX(50);
+            } else if (contador == 2) {
+                disparo.setY(100);
+                disparo.setX(100);
+            } else if (contador == 3) {
+                disparo.setY(200);
+                disparo.setX(150);
+            }
+        }
+        if (contador == 1){
+            disparo.setY(15);
+            disparo.setX(50);
+        } else if (contador == 2) {
+            disparo.setY(100);
+            disparo.setX(100);
+        } else if (contador == 3) {
+            disparo.setY(200);
+            disparo.setX(150);
+        }
         disparo_lista.add(disparo);
-    }
+    }*/
 }
