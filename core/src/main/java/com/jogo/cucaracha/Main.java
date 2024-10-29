@@ -38,6 +38,7 @@ public class Main extends ApplicationAdapter {
 
     public Rectangle inimigo_retangulo;
     public Rectangle disparo_retangulo;
+    public Rectangle jogador_retangulo;
 
     boolean disparo_verifcacao;
 
@@ -98,6 +99,7 @@ public class Main extends ApplicationAdapter {
             }
             jogador_temp_movimento = jogador_personagem.jogadorPersonagemMovimento(contador);
         }
+        jogador_retangulo = new Rectangle(jogador_temp_movimento.x, jogador_temp_movimento.y, jogador_textura.getWidth(), jogador_textura.getHeight() - 20);
         //Trecho de captura do input do usuário
 
         //Geração e movimentação do disparo do jogador
@@ -125,6 +127,10 @@ public class Main extends ApplicationAdapter {
 
             if (inimigo_movimento.getX() < -inimigo_movimento_largura) {
                 inimigo_lista.removeIndex(i);
+            }
+
+            if (jogador_retangulo.overlaps(inimigo_retangulo)) {
+                System.out.println("Colisao");
             }
 
             if (disparo_verifcacao){
