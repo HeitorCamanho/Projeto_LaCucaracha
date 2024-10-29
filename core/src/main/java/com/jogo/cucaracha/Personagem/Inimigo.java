@@ -26,5 +26,4 @@ public class Inimigo {
         }
         return inimigo;
     }
-
 }

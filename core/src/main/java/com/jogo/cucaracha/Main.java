@@ -28,7 +28,7 @@ public class Main extends ApplicationAdapter {
     public Jogador jogador_personagem;
 
     public Inimigo inimigo_personagem;
-    public int contador = 1;
+    public int contador = 2;
 
     public float inimigo_tempo_geracao;
     public float disparo_tempo_geracao;
@@ -54,7 +54,7 @@ public class Main extends ApplicationAdapter {
 
         jogador_textura = new Texture("Jogador/img_textura.png");
         jogador_personagem = new Jogador(jogador_textura);
-        jogador_temp_movimento = new Vector2(11, 0);
+        jogador_temp_movimento = new Vector2(11, 95);
 
         disparo_textura = new Texture("Jogador/img_disparo.png");
         disparo_lista =  new Array<>();
