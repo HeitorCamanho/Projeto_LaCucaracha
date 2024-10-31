@@ -18,10 +18,10 @@ public class Inimigo {
             inimigo.setY(15);
             inimigo.setX(1500);
         } else if (escolha == 2) {
-            inimigo.setY(100);
+            inimigo.setY(110);
             inimigo.setX(1500);
         } else if (escolha == 3) {
-            inimigo.setY(200);
+            inimigo.setY(205);
             inimigo.setX(1500);
         }
         return inimigo;
