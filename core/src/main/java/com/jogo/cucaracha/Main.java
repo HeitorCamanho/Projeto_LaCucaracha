@@ -23,7 +23,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
 
-    private Texture tela_fase_fundo_textura;
     private Texture inimigo_textura;
     private Texture jogador_textura;
     private Texture disparo_textura;
@@ -40,6 +39,7 @@ public class Main extends ApplicationAdapter {
 
     public int contador;
     public int cenario;
+    int tela_fase_fundo_index;
 
     public float inimigo_tempo_geracao;
     public float disparo_tempo_geracao;
@@ -67,8 +67,16 @@ public class Main extends ApplicationAdapter {
     public Music tela_fase_som;
     public Music tela_menu_som;
 
-    Animation<TextureRegion> jogador_animacao;
-    Animation<TextureRegion> inimigo_animacao;
+    public Animation<TextureRegion> jogador_animacao;
+    public Animation<TextureRegion> inimigo_animacao;
+
+    private static final int tela_fase_fundo_colunas = 3, tela_fase_fundo_linhas = 1;
+
+    public Animation<TextureRegion> tela_fase_fundo_animacao;
+    public float tela_fase_fundo_tempo_animacao;
+    private Texture tela_fase_fundo_textura;
+    TextureRegion[][] tela_fase_fundo_temp;
+    TextureRegion[] tela_fase_fundo_frames;
 
 
     @Override
@@ -80,10 +88,6 @@ public class Main extends ApplicationAdapter {
         botao_menu_textura = new Texture("Telas/Menu/Botao_Menu.png");
         botao_menu_variante_textura = new Texture("Telas/Menu/Botao_Menu_Variante.png");
         botao_menu_verifcacao = false;
-        tela_menu_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Menu/som_tela_menu.mp3"));
-
-        tela_fase_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Fase/som_tela_fase.mp3"));
-        tela_fase_fundo_textura = new Texture("Telas/Fase/img_fundo.png");
 
         inimigo_som_colisao_jogador = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_jogador.mp3"));
         inimigo_som_colisao_disparo = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_colisao.mp3"));
@@ -106,6 +110,20 @@ public class Main extends ApplicationAdapter {
         disparo_lista =  new Array<>();
         disparo_verifcacao = false;
         disparo_movimento = new Vector2(0, 0);
+
+        tela_menu_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Menu/som_tela_menu.mp3"));
+        tela_fase_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Fase/som_tela_fase.mp3"));
+        tela_fase_fundo_textura = new Texture("Telas/Fase/img_fundo_fase_sheet.png");
+        tela_fase_fundo_temp = TextureRegion.split(tela_fase_fundo_textura, tela_fase_fundo_textura.getWidth() / tela_fase_fundo_colunas, tela_fase_fundo_textura.getHeight() / tela_fase_fundo_linhas);
+        tela_fase_fundo_frames = new TextureRegion[tela_fase_fundo_colunas * tela_fase_fundo_linhas];
+        tela_fase_fundo_animacao = new Animation<TextureRegion>(0.5f, tela_fase_fundo_frames);
+        tela_fase_fundo_index = 0;
+        for (int i = 0; i < tela_fase_fundo_linhas; i++) {
+            for (int j = 0; j < tela_fase_fundo_colunas; j++) {
+                tela_fase_fundo_frames[tela_fase_fundo_index++] = tela_fase_fundo_temp[i][j];
+            }
+        }
+
     }
 
     @Override
@@ -141,6 +159,7 @@ public class Main extends ApplicationAdapter {
 
 //----------------------------------------------------------------------------------------
 
+    //Função responsável pela lógica menu
     public void logicaMenu() {
         botao_menu_retangulo = new Rectangle(640f, 435f, botao_menu_textura.getWidth(), botao_menu_textura.getHeight());
 
@@ -157,6 +176,7 @@ public class Main extends ApplicationAdapter {
             cenario = 2;
         }
     }
+    //Função responsável pela lógica menu
 
     //Função responsável pela lógica principal
     public void logicaFase(){
@@ -173,7 +193,6 @@ public class Main extends ApplicationAdapter {
             else {
                 contador = 3;
             }
-
         }
         if (Gdx.input.isKeyJustPressed(Keys.DOWN)) {
             contador--;
@@ -184,7 +203,6 @@ public class Main extends ApplicationAdapter {
             else {
                 contador = 1;
             }
-
         }
         jogador_retangulo = new Rectangle(jogador_temp_movimento.x, jogador_temp_movimento.y, jogador_textura.getWidth(), jogador_textura.getHeight());
         //Trecho de captura do input do usuário
@@ -242,6 +260,7 @@ public class Main extends ApplicationAdapter {
     }
     //Função responsável pela lógica principal
 
+    //Função responsável por desenhar o jogo
     public void desenhoMenu(){
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
@@ -260,17 +279,23 @@ public class Main extends ApplicationAdapter {
 
         batch.end();
     }
+    //Função responsável por desenhar o jogo
 
     //Função responsável por desenhar o jogo
     public void desenhoFase(){
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
         jogador_tempo_animacao += Gdx.graphics.getDeltaTime();
         inimigo_tempo_animacao += Gdx.graphics.getDeltaTime();
+        tela_fase_fundo_tempo_animacao += Gdx.graphics.getDeltaTime();
 
         batch.begin();
-        batch.draw(tela_fase_fundo_textura, 0, 0);
         TextureRegion jogador_frame = jogador_animacao.getKeyFrame(jogador_tempo_animacao, true);
         TextureRegion inimigo_frame = inimigo_animacao.getKeyFrame(inimigo_tempo_animacao, true);
+        TextureRegion tela_fase_fundo_frame = tela_fase_fundo_animacao.getKeyFrame(tela_fase_fundo_tempo_animacao, true);
+
+        //Desenhando o fundo de tela
+        batch.draw(tela_fase_fundo_frame, 0, 0);
+        //Desenhando o fundo de tela
 
         //Desenhando o jogador
         batch.draw(jogador_frame, jogador_temp_movimento.x, jogador_temp_movimento.y);
@@ -314,4 +339,6 @@ public class Main extends ApplicationAdapter {
         }
     }
     //Função responsável por criar o disparo do jogador
+
+    //heitor viado
 }
