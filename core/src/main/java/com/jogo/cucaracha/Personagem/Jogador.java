@@ -15,10 +15,6 @@ public class Jogador{
         this.textura = textura;
     }
 
-    public Texture getTextura(){
-        return this.textura;
-    }
-
     public TextureRegion[] carregarSpriteSheet(){
         TextureRegion[][] tmp = TextureRegion.split(this.textura, this.textura.getWidth() / colunas, this.textura.getHeight() / linhas);
         TextureRegion[] jogador_frames = new TextureRegion[colunas * linhas];

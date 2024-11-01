@@ -19,7 +19,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 
-
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
@@ -39,8 +38,8 @@ public class Main extends ApplicationAdapter {
 
     public Inimigo inimigo_personagem;
 
-    public int contador = 2;
-    public int cenario = 1;
+    public int contador;
+    public int cenario;
 
     public float inimigo_tempo_geracao;
     public float disparo_tempo_geracao;
@@ -75,6 +74,8 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
+        contador = 2;
+        cenario = 1;
 
         botao_menu_textura = new Texture("Telas/Menu/Botao_Menu.png");
         botao_menu_variante_textura = new Texture("Telas/Menu/Botao_Menu_Variante.png");
@@ -192,7 +193,6 @@ public class Main extends ApplicationAdapter {
         disparo_tempo_geracao += delta;
         if (disparo_tempo_geracao > 0.5f){
             disparoGeracao();
-
         }
 
         if (disparo_verifcacao){
@@ -218,6 +218,9 @@ public class Main extends ApplicationAdapter {
 
             if (jogador_retangulo.overlaps(inimigo_retangulo)) {
                 inimigo_som_colisao_jogador.play();
+                inimigo_lista.clear();
+                disparo_tempo_geracao = 0;
+                disparo_verifcacao = false;
                 cenario = 1;
             }
 
