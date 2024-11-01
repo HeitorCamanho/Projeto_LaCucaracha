@@ -30,6 +30,7 @@ public class Main extends ApplicationAdapter {
     private Texture disparo_textura;
     private Texture botao_menu_textura;
     private Texture botao_menu_variante_textura;
+    private Texture inimigo_textura_sheet;
 
     public Vector2 jogador_temp_movimento;
     public Vector2 disparo_movimento;
@@ -44,6 +45,7 @@ public class Main extends ApplicationAdapter {
     public float inimigo_tempo_geracao;
     public float disparo_tempo_geracao;
     public float jogador_tempo_animacao;
+    public float inimigo_tempo_animacao;
 
     public Array<Sprite> inimigo_lista;
     public Array<Sprite> disparo_lista;
@@ -67,6 +69,8 @@ public class Main extends ApplicationAdapter {
     public Music tela_menu_som;
 
     Animation<TextureRegion> jogador_animacao;
+    Animation<TextureRegion> inimigo_animacao;
+
 
     @Override
     public void create() {
@@ -83,8 +87,10 @@ public class Main extends ApplicationAdapter {
         inimigo_som_colisao_jogador = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_jogador.mp3"));
         inimigo_som_colisao_disparo = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_colisao.mp3"));
         inimigo_textura = new Texture("Inimigo/img_textura.png");
+        inimigo_textura_sheet = new Texture("Inimigo/img_inimigo_sheet.png");
         inimigo_lista = new Array<>();
-        inimigo_personagem = new Inimigo(inimigo_textura);
+        inimigo_personagem = new Inimigo(inimigo_textura, inimigo_textura_sheet);
+        inimigo_animacao = new Animation<TextureRegion>(0.5f, inimigo_personagem.carregarSpriteSheet());
 
         jogador_som_cima = Gdx.audio.newSound(Gdx.files.internal("Jogador/som_jogador_cima.mp3"));
         jogador_som_baixo = Gdx.audio.newSound(Gdx.files.internal("Jogador/som_jogador_baixo.mp3"));
@@ -170,7 +176,7 @@ public class Main extends ApplicationAdapter {
         }
         if (Gdx.input.isKeyJustPressed(Keys.DOWN)) {
             contador--;
-            if (contador >= 0){
+            if (contador >= 1){
                 jogador_som_baixo.play();
                 jogador_temp_movimento = jogador_personagem.jogadorPersonagemMovimento(contador);
             }
@@ -256,12 +262,16 @@ public class Main extends ApplicationAdapter {
     public void desenhoFase(){
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
         jogador_tempo_animacao += Gdx.graphics.getDeltaTime();
+        inimigo_tempo_animacao += Gdx.graphics.getDeltaTime();
 
         batch.begin();
-
         batch.draw(tela_fase_fundo_textura, 0, 0);
-        TextureRegion currentFrame = jogador_animacao.getKeyFrame(jogador_tempo_animacao, true);
-        batch.draw(currentFrame, jogador_temp_movimento.x, jogador_temp_movimento.y);
+        TextureRegion jogador_frame = jogador_animacao.getKeyFrame(jogador_tempo_animacao, true);
+        TextureRegion inimigo_frame = inimigo_animacao.getKeyFrame(inimigo_tempo_animacao, true);
+
+        //Desenhando o jogador
+        batch.draw(jogador_frame, jogador_temp_movimento.x, jogador_temp_movimento.y);
+        //Desenhando o jogador
 
         //Desenhando o tiro
         if (disparo_verifcacao){
@@ -270,8 +280,8 @@ public class Main extends ApplicationAdapter {
         //Desenhando o tiro
 
         //Desenhando o inimigo
-        for (Sprite inimigo_desenho : inimigo_lista) {
-            inimigo_desenho.draw(batch);
+        for (int i = inimigo_lista.size - 1; i >= 0; i--) {
+            batch.draw(inimigo_frame, inimigo_lista.get(i).getX(), inimigo_lista.get(i).getY());
         }
         //Desenhando o inimigo
         batch.end();

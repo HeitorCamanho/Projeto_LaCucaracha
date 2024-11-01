@@ -21,14 +21,14 @@ public class Jogador{
 
     public TextureRegion[] carregarSpriteSheet(){
         TextureRegion[][] tmp = TextureRegion.split(this.textura, this.textura.getWidth() / colunas, this.textura.getHeight() / linhas);
-        TextureRegion[] walkFrames = new TextureRegion[colunas * linhas];
+        TextureRegion[] jogador_frames = new TextureRegion[colunas * linhas];
         int index = 0;
         for (int i = 0; i < linhas; i++) {
             for (int j = 0; j < colunas; j++) {
-                walkFrames[index++] = tmp[i][j];
+                jogador_frames[index++] = tmp[i][j];
             }
         }
-        return walkFrames;
+        return jogador_frames;
     }
 
     public Vector2 jogadorPersonagemMovimento(int posicao)
