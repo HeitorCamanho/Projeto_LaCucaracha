@@ -204,7 +204,7 @@ public class Main extends ApplicationAdapter {
                 contador = 1;
             }
         }
-        jogador_retangulo = new Rectangle(jogador_temp_movimento.x, jogador_temp_movimento.y, jogador_textura.getWidth(), jogador_textura.getHeight());
+        jogador_retangulo = new Rectangle(jogador_temp_movimento.x, jogador_temp_movimento.y, jogador_textura.getWidth() - 60, jogador_textura.getHeight());
         //Trecho de captura do input do usuário
 
         //Geração e movimentação do disparo do jogador
@@ -227,7 +227,14 @@ public class Main extends ApplicationAdapter {
             Sprite inimigo_movimento = inimigo_lista.get(i);
             float inimigo_movimento_largura = inimigo_movimento.getWidth();
 
-            inimigo_movimento.translateX(-100f * delta);
+            if (inimigo_movimento.getY() <= 15){
+                inimigo_movimento.translateX(-100f * delta);
+            } else if (inimigo_movimento.getY() <= 110) {
+                inimigo_movimento.translateX(-150f * delta);
+            } else {
+                inimigo_movimento.translateX(-200f * delta);
+            }
+
             inimigo_retangulo = new Rectangle(inimigo_movimento.getX(), inimigo_movimento.getY(), inimigo_textura.getWidth(), inimigo_textura.getHeight());
 
             if (inimigo_movimento.getX() < -inimigo_movimento_largura) {
@@ -235,11 +242,12 @@ public class Main extends ApplicationAdapter {
             }
 
             if (jogador_retangulo.overlaps(inimigo_retangulo)) {
-                inimigo_som_colisao_jogador.play();
                 inimigo_lista.clear();
+                inimigo_som_colisao_jogador.play();
                 disparo_tempo_geracao = 0;
                 disparo_verifcacao = false;
                 cenario = 1;
+                break;
             }
 
             if (disparo_verifcacao){
