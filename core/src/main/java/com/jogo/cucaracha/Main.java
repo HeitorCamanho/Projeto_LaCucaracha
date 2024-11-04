@@ -47,13 +47,15 @@ public class Main extends ApplicationAdapter {
 
     public int contador;
     public int cenario;
-    int tela_fase_fundo_index;
+    public int tela_fase_fundo_index;
 
+    public float inimigo_velocidade;
     public float inimigo_tempo_geracao;
     public float disparo_tempo_geracao;
     public float jogador_tempo_animacao;
     public float inimigo_tempo_animacao;
     public float tela_fase_fundo_tempo_animacao;
+    public float dificuldade_tempo;
 
     public Array<Sprite> inimigo_lista;
     public Array<Sprite> disparo_lista;
@@ -243,12 +245,23 @@ public class Main extends ApplicationAdapter {
             Sprite inimigo_movimento = inimigo_lista.get(i);
             float inimigo_movimento_largura = inimigo_movimento.getWidth();
 
+            dificuldade_tempo += delta;
+            if(dificuldade_tempo < 40f){
+                inimigo_velocidade = 1f;
+            } else if (dificuldade_tempo < 120f){
+                inimigo_velocidade = 1.5f;
+            }
+            else {
+                inimigo_velocidade = 2f;
+            }
+
+
             if (inimigo_movimento.getY() <= 15){
-                inimigo_movimento.translateX(-100f * delta);
+                inimigo_movimento.translateX((-100f * inimigo_velocidade) * delta);
             } else if (inimigo_movimento.getY() <= 110) {
-                inimigo_movimento.translateX(-150f * delta);
+                inimigo_movimento.translateX((-150f * inimigo_velocidade) * delta);
             } else {
-                inimigo_movimento.translateX(-200f * delta);
+                inimigo_movimento.translateX((-200f * inimigo_velocidade) * delta);
             }
 
             inimigo_retangulo = new Rectangle(inimigo_movimento.getX(), inimigo_movimento.getY(), inimigo_textura.getWidth(), inimigo_textura.getHeight());
