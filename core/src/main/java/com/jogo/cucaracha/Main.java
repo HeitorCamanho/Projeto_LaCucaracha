@@ -34,6 +34,8 @@ public class Main extends ApplicationAdapter {
     public Texture botao_menu_sair_variante_textura;
     public Texture inimigo_textura_sheet;
     public Texture tela_fase_fundo_textura;
+    public Texture tela_menu_fundo_textura;
+    public Texture tela_menu_mouse;
 
     public TextureRegion[][] tela_fase_fundo_temp;
     public TextureRegion[] tela_fase_fundo_frames;
@@ -94,6 +96,8 @@ public class Main extends ApplicationAdapter {
         contador = 2;
         cenario = 1;
 
+        tela_menu_fundo_textura = new Texture("Telas/Menu/img_tela_menu.jpeg");
+        tela_menu_mouse = new Texture("Telas/Menu/img_mouse.png");
         tela_menu_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Menu/som_tela_menu.mp3"));
         botao_menu_jogar_textura = new Texture("Telas/Menu/img_botao_menu.png");
         botao_menu_jogar_variante_textura = new Texture("Telas/Menu/img_botao_menu_variante.png");
@@ -173,10 +177,10 @@ public class Main extends ApplicationAdapter {
 
     //Função responsável pela lógica menu
     public void logicaMenu() {
-        botao_menu_jogo_retangulo = new Rectangle((360 - botao_menu_jogar_textura.getWidth()), 435, botao_menu_jogar_textura.getWidth(), botao_menu_jogar_textura.getHeight());
+        botao_menu_jogo_retangulo = new Rectangle((450 - botao_menu_jogar_textura.getWidth()), 435, botao_menu_jogar_textura.getWidth(), botao_menu_jogar_textura.getHeight());
         botao_menu_sair_retangulo = new Rectangle((720 + botao_menu_sair_textura.getWidth()), 435, botao_menu_sair_textura.getWidth(), botao_menu_sair_textura.getHeight());
 
-        mouse_retangulo = new Rectangle(Gdx.input.getX() - 20, (Gdx.graphics.getHeight() - Gdx.input.getY()) - 20, disparo_textura.getWidth(), disparo_textura.getHeight());
+        mouse_retangulo = new Rectangle(Gdx.input.getX(), (Gdx.graphics.getHeight() - Gdx.input.getY()) - 10, tela_menu_mouse.getWidth(), tela_menu_mouse.getHeight());
 
         botao_menu_jogar_verifcacao = mouse_retangulo.overlaps(botao_menu_jogo_retangulo);
         botao_menu_sair_verifcacao = mouse_retangulo.overlaps(botao_menu_sair_retangulo);
@@ -255,7 +259,6 @@ public class Main extends ApplicationAdapter {
                 inimigo_velocidade = 2f;
             }
 
-
             if (inimigo_movimento.getY() <= 15){
                 inimigo_movimento.translateX((-100f * inimigo_velocidade) * delta);
             } else if (inimigo_movimento.getY() <= 110) {
@@ -300,16 +303,15 @@ public class Main extends ApplicationAdapter {
     //Função responsável por desenhar o jogo
     public void desenhoMenu(){
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-
         batch.begin();
         //Desenhando os detalhes básicos
-        batch.draw(tela_fase_fundo_textura, 0, 0);
+        batch.draw(tela_menu_fundo_textura, 0, 0);
 
         if(botao_menu_jogar_verifcacao){
-            batch.draw(botao_menu_jogar_variante_textura, (360 - botao_menu_jogar_variante_textura.getWidth()), 435);
+            batch.draw(botao_menu_jogar_variante_textura, (450 - botao_menu_jogar_variante_textura.getWidth()), 435);
         }
         else {
-            batch.draw(botao_menu_jogar_textura, (360 - botao_menu_jogar_textura.getWidth()), 435);
+            batch.draw(botao_menu_jogar_textura, (450 - botao_menu_jogar_textura.getWidth()), 435);
         }
 
         if(botao_menu_sair_verifcacao){
@@ -318,9 +320,6 @@ public class Main extends ApplicationAdapter {
         else {
             batch.draw(botao_menu_sair_textura, (720 + botao_menu_sair_textura.getWidth()), 435);
         }
-
-        batch.draw(disparo_textura, mouse_retangulo.getX(), mouse_retangulo.getY());
-
         batch.end();
     }
     //Função responsável por desenhar o jogo
