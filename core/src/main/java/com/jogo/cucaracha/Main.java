@@ -6,24 +6,30 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.jogo.cucaracha.Personagem.Inimigo;
 import com.jogo.cucaracha.Personagem.Jogador;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-
-import java.util.concurrent.RecursiveAction;
 
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
     public SpriteBatch batch;
+
+    public FreeTypeFontGenerator fonte_gerador;
+    public FreeTypeFontGenerator.FreeTypeFontParameter fonte_parametro;
+
+    public BitmapFont fonte_bitmap;
 
     public Texture inimigo_textura;
     public Texture jogador_textura;
@@ -50,6 +56,8 @@ public class Main extends ApplicationAdapter {
     public int contador;
     public int cenario;
     public int tela_fase_fundo_index;
+    public int pontuacao_baratas;
+    public int baratas_fuga;
 
     public float inimigo_velocidade;
     public float inimigo_tempo_geracao;
@@ -95,6 +103,14 @@ public class Main extends ApplicationAdapter {
         batch = new SpriteBatch();
         contador = 2;
         cenario = 1;
+        pontuacao_baratas = 0;
+        baratas_fuga = 3;
+
+        fonte_gerador = new FreeTypeFontGenerator(Gdx.files.internal("Fonte/font.ttf"));
+        fonte_parametro = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        fonte_parametro.size = 48;
+        fonte_parametro.color = Color.WHITE;
+        fonte_bitmap = fonte_gerador.generateFont(fonte_parametro);
 
         tela_menu_fundo_textura = new Texture("Telas/Menu/img_tela_menu.jpeg");
         tela_menu_mouse = new Texture("Telas/Menu/img_mouse.png");
@@ -249,7 +265,9 @@ public class Main extends ApplicationAdapter {
             Sprite inimigo_movimento = inimigo_lista.get(i);
             float inimigo_movimento_largura = inimigo_movimento.getWidth();
 
+            //Controlando a movimentação das baratas
             dificuldade_tempo += delta;
+
             if(dificuldade_tempo < 40f){
                 inimigo_velocidade = 1f;
             } else if (dificuldade_tempo < 120f){
@@ -266,11 +284,21 @@ public class Main extends ApplicationAdapter {
             } else {
                 inimigo_movimento.translateX((-200f * inimigo_velocidade) * delta);
             }
+            //Controlando a movimentação das baratas
 
             inimigo_retangulo = new Rectangle(inimigo_movimento.getX(), inimigo_movimento.getY(), inimigo_textura.getWidth(), inimigo_textura.getHeight());
 
             if (inimigo_movimento.getX() < -inimigo_movimento_largura) {
                 inimigo_lista.removeIndex(i);
+                --baratas_fuga;
+                if(baratas_fuga <= -1){
+                    inimigo_lista.clear();
+                    disparo_tempo_geracao = 0;
+                    disparo_verifcacao = false;
+                    baratas_fuga = 3;
+                    cenario = 1;
+                    break;
+                }
             }
 
             if (jogador_retangulo.overlaps(inimigo_retangulo)) {
@@ -284,6 +312,7 @@ public class Main extends ApplicationAdapter {
 
             if (disparo_verifcacao){
                 if (disparo_retangulo.overlaps(inimigo_retangulo)) {
+                    ++pontuacao_baratas;
                     inimigo_som_colisao_disparo.play();
                     inimigo_lista.removeIndex(i);
                     disparo_verifcacao = false;
@@ -355,6 +384,10 @@ public class Main extends ApplicationAdapter {
             batch.draw(inimigo_frame, inimigo_lista.get(i).getX(), inimigo_lista.get(i).getY());
         }
         //Desenhando o inimigo
+
+        //Desenhando a pontuação
+        fonte_bitmap.draw(batch, ":  "+pontuacao_baratas, 20, Gdx.graphics.getHeight() - 20);
+        //Desenhando a pontuação
         batch.end();
     }
     //Função responsável por desenhar o jogo
