@@ -6,29 +6,46 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.jogo.cucaracha.Personagem.Inimigo;
 import com.jogo.cucaracha.Personagem.Jogador;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    private SpriteBatch batch;
+    public SpriteBatch batch;
 
-    private Texture inimigo_textura;
-    private Texture jogador_textura;
-    private Texture disparo_textura;
-    private Texture botao_menu_textura;
-    private Texture botao_menu_variante_textura;
-    private Texture inimigo_textura_sheet;
+    public FreeTypeFontGenerator fonte_gerador;
+    public FreeTypeFontGenerator.FreeTypeFontParameter fonte_parametro;
+
+    public BitmapFont fonte_bitmap;
+
+    public Texture inimigo_textura;
+    public Texture jogador_textura;
+    public Texture disparo_textura;
+    public Texture botao_menu_jogar_textura;
+    public Texture botao_menu_jogar_variante_textura;
+    public Texture botao_menu_sair_textura;
+    public Texture botao_menu_sair_variante_textura;
+    public Texture inimigo_textura_sheet;
+    public Texture tela_fase_fundo_textura;
+    public Texture tela_menu_fundo_textura;
+    public Texture tela_menu_mouse;
+    public Texture tela_fase_icone_barata_vida;
+    public Texture tela_fase_icone_barata_ponto;
+
+    public TextureRegion[][] tela_fase_fundo_temp;
+    public TextureRegion[] tela_fase_fundo_frames;
 
     public Vector2 jogador_temp_movimento;
     public Vector2 disparo_movimento;
@@ -39,12 +56,17 @@ public class Main extends ApplicationAdapter {
 
     public int contador;
     public int cenario;
-    int tela_fase_fundo_index;
+    public int tela_fase_fundo_index;
+    public int pontuacao_baratas;
+    public int baratas_fuga;
 
+    public float inimigo_velocidade;
     public float inimigo_tempo_geracao;
     public float disparo_tempo_geracao;
     public float jogador_tempo_animacao;
     public float inimigo_tempo_animacao;
+    public float tela_fase_fundo_tempo_animacao;
+    public float dificuldade_tempo;
 
     public Array<Sprite> inimigo_lista;
     public Array<Sprite> disparo_lista;
@@ -52,31 +74,30 @@ public class Main extends ApplicationAdapter {
     public Rectangle inimigo_retangulo;
     public Rectangle disparo_retangulo;
     public Rectangle jogador_retangulo;
-    public Rectangle botao_menu_retangulo;
+    public Rectangle botao_menu_jogo_retangulo;
+    public Rectangle botao_menu_sair_retangulo;
     public Rectangle mouse_retangulo;
 
     public boolean disparo_verifcacao;
-    public boolean botao_menu_verifcacao;
+    public boolean botao_menu_jogar_verifcacao;
+    public boolean botao_menu_sair_verifcacao;
+    public boolean dipose_verificacao;
 
     public Sound jogador_som_cima;
     public Sound jogador_som_baixo;
     public Sound disparo_som;
     public Sound inimigo_som_colisao_disparo;
     public Sound inimigo_som_colisao_jogador;
+    public Sound inimigo_som_vitoria;
 
     public Music tela_fase_som;
     public Music tela_menu_som;
 
     public Animation<TextureRegion> jogador_animacao;
     public Animation<TextureRegion> inimigo_animacao;
-
-    private static final int tela_fase_fundo_colunas = 3, tela_fase_fundo_linhas = 1;
-
     public Animation<TextureRegion> tela_fase_fundo_animacao;
-    public float tela_fase_fundo_tempo_animacao;
-    private Texture tela_fase_fundo_textura;
-    TextureRegion[][] tela_fase_fundo_temp;
-    TextureRegion[] tela_fase_fundo_frames;
+
+    public static final int tela_fase_fundo_colunas = 3, tela_fase_fundo_linhas = 1;
 
 
     @Override
@@ -84,11 +105,26 @@ public class Main extends ApplicationAdapter {
         batch = new SpriteBatch();
         contador = 2;
         cenario = 1;
+        pontuacao_baratas = 0;
+        baratas_fuga = 3;
 
-        botao_menu_textura = new Texture("Telas/Menu/Botao_Menu.png");
-        botao_menu_variante_textura = new Texture("Telas/Menu/Botao_Menu_Variante.png");
-        botao_menu_verifcacao = false;
+        fonte_gerador = new FreeTypeFontGenerator(Gdx.files.internal("Fonte/font.ttf"));
+        fonte_parametro = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        fonte_parametro.size = 48;
+        fonte_parametro.color = Color.WHITE;
+        fonte_bitmap = fonte_gerador.generateFont(fonte_parametro);
 
+        tela_menu_fundo_textura = new Texture("Telas/Menu/img_tela_menu.jpeg");
+        tela_menu_mouse = new Texture("Telas/Menu/img_mouse.png");
+        tela_menu_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Menu/som_tela_menu.mp3"));
+        botao_menu_jogar_textura = new Texture("Telas/Menu/img_botao_menu.png");
+        botao_menu_jogar_variante_textura = new Texture("Telas/Menu/img_botao_menu_variante.png");
+        botao_menu_sair_textura =  new Texture("Telas/Menu/img_botao_sair.png");
+        botao_menu_sair_variante_textura = new Texture("Telas/Menu/img_botao_sair_variante.png");
+        botao_menu_jogar_verifcacao = false;
+        botao_menu_sair_verifcacao = false;
+
+        inimigo_som_vitoria = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_vitoria.mp3"));
         inimigo_som_colisao_jogador = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_jogador.mp3"));
         inimigo_som_colisao_disparo = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_colisao.mp3"));
         inimigo_textura = new Texture("Inimigo/img_textura.png");
@@ -111,7 +147,8 @@ public class Main extends ApplicationAdapter {
         disparo_verifcacao = false;
         disparo_movimento = new Vector2(0, 0);
 
-        tela_menu_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Menu/som_tela_menu.mp3"));
+        tela_fase_icone_barata_ponto = new Texture("Telas/Fase/img_barata_ponto.png");
+        tela_fase_icone_barata_vida = new Texture("Telas/Fase/img_barata_vida.png");
         tela_fase_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Fase/som_tela_fase.mp3"));
         tela_fase_fundo_textura = new Texture("Telas/Fase/img_fundo_fase_sheet.png");
         tela_fase_fundo_temp = TextureRegion.split(tela_fase_fundo_textura, tela_fase_fundo_textura.getWidth() / tela_fase_fundo_colunas, tela_fase_fundo_textura.getHeight() / tela_fase_fundo_linhas);
@@ -123,7 +160,6 @@ public class Main extends ApplicationAdapter {
                 tela_fase_fundo_frames[tela_fase_fundo_index++] = tela_fase_fundo_temp[i][j];
             }
         }
-
     }
 
     @Override
@@ -137,6 +173,9 @@ public class Main extends ApplicationAdapter {
                 desenhoMenu();
                 break;
             case 2:
+                if(dipose_verificacao){
+                    dispose();
+                }
                 tela_menu_som.stop();
                 tela_fase_som.setLooping(true);
                 tela_fase_som.play();
@@ -145,35 +184,40 @@ public class Main extends ApplicationAdapter {
                 break;
             default:
                 dispose();
+                break;
         }
     }
 
     @Override
     public void dispose() {
-        batch.dispose();
-        tela_fase_fundo_textura.dispose();
-        jogador_textura.dispose();
-        inimigo_textura.dispose();
-        disparo_textura.dispose();
+        tela_menu_som.dispose();
+        dipose_verificacao = false;
     }
 
 //----------------------------------------------------------------------------------------
 
     //Função responsável pela lógica menu
     public void logicaMenu() {
-        botao_menu_retangulo = new Rectangle(640f, 435f, botao_menu_textura.getWidth(), botao_menu_textura.getHeight());
+        botao_menu_jogo_retangulo = new Rectangle((450 - botao_menu_jogar_textura.getWidth()), 435, botao_menu_jogar_textura.getWidth(), botao_menu_jogar_textura.getHeight());
+        botao_menu_sair_retangulo = new Rectangle((720 + botao_menu_sair_textura.getWidth()), 435, botao_menu_sair_textura.getWidth(), botao_menu_sair_textura.getHeight());
 
-        mouse_retangulo = new Rectangle(Gdx.input.getX() - 20, (Gdx.graphics.getHeight() - Gdx.input.getY()) - 20, disparo_textura.getWidth(), disparo_textura.getHeight());
+        mouse_retangulo = new Rectangle(Gdx.input.getX(), (Gdx.graphics.getHeight() - Gdx.input.getY()) - 10, tela_menu_mouse.getWidth(), tela_menu_mouse.getHeight());
 
-        if (mouse_retangulo.overlaps(botao_menu_retangulo)) {
-            botao_menu_verifcacao = true;
-        }
-        else {
-            botao_menu_verifcacao = false;
+        botao_menu_jogar_verifcacao = mouse_retangulo.overlaps(botao_menu_jogo_retangulo);
+        botao_menu_sair_verifcacao = mouse_retangulo.overlaps(botao_menu_sair_retangulo);
+
+        if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
+            if(botao_menu_jogar_verifcacao){
+                baratas_fuga = 3;
+                dipose_verificacao = true;
+                cenario = 2;
+            }
         }
 
         if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
-            cenario = 2;
+            if(botao_menu_sair_verifcacao){
+                Gdx.app.exit();
+            }
         }
     }
     //Função responsável pela lógica menu
@@ -204,7 +248,7 @@ public class Main extends ApplicationAdapter {
                 contador = 1;
             }
         }
-        jogador_retangulo = new Rectangle(jogador_temp_movimento.x, jogador_temp_movimento.y, jogador_textura.getWidth(), jogador_textura.getHeight());
+        jogador_retangulo = new Rectangle(jogador_temp_movimento.x, jogador_temp_movimento.y, jogador_textura.getWidth() - 60, jogador_textura.getHeight());
         //Trecho de captura do input do usuário
 
         //Geração e movimentação do disparo do jogador
@@ -227,23 +271,54 @@ public class Main extends ApplicationAdapter {
             Sprite inimigo_movimento = inimigo_lista.get(i);
             float inimigo_movimento_largura = inimigo_movimento.getWidth();
 
-            inimigo_movimento.translateX(-100f * delta);
+            //Controlando a movimentação das baratas
+            dificuldade_tempo += delta;
+
+            if(dificuldade_tempo < 40f){
+                inimigo_velocidade = 1f;
+            } else if (dificuldade_tempo < 120f){
+                inimigo_velocidade = 1.5f;
+            }
+            else {
+                inimigo_velocidade = 2f;
+            }
+
+            if (inimigo_movimento.getY() <= 15){
+                inimigo_movimento.translateX((-100f * inimigo_velocidade) * delta);
+            } else if (inimigo_movimento.getY() <= 110) {
+                inimigo_movimento.translateX((-150f * inimigo_velocidade) * delta);
+            } else {
+                inimigo_movimento.translateX((-200f * inimigo_velocidade) * delta);
+            }
+            //Controlando a movimentação das baratas
+
             inimigo_retangulo = new Rectangle(inimigo_movimento.getX(), inimigo_movimento.getY(), inimigo_textura.getWidth(), inimigo_textura.getHeight());
 
             if (inimigo_movimento.getX() < -inimigo_movimento_largura) {
                 inimigo_lista.removeIndex(i);
+                --baratas_fuga;
+                inimigo_som_vitoria.play();
+                if(baratas_fuga <= -1){
+                    inimigo_lista.clear();
+                    disparo_tempo_geracao = 0;
+                    disparo_verifcacao = false;
+                    cenario = 1;
+                    break;
+                }
             }
 
             if (jogador_retangulo.overlaps(inimigo_retangulo)) {
-                inimigo_som_colisao_jogador.play();
                 inimigo_lista.clear();
+                inimigo_som_colisao_jogador.play();
                 disparo_tempo_geracao = 0;
                 disparo_verifcacao = false;
                 cenario = 1;
+                break;
             }
 
             if (disparo_verifcacao){
                 if (disparo_retangulo.overlaps(inimigo_retangulo)) {
+                    ++pontuacao_baratas;
                     inimigo_som_colisao_disparo.play();
                     inimigo_lista.removeIndex(i);
                     disparo_verifcacao = false;
@@ -263,20 +338,23 @@ public class Main extends ApplicationAdapter {
     //Função responsável por desenhar o jogo
     public void desenhoMenu(){
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-
         batch.begin();
         //Desenhando os detalhes básicos
-        batch.draw(tela_fase_fundo_textura, 0, 0);
+        batch.draw(tela_menu_fundo_textura, 0, 0);
 
-        if(botao_menu_verifcacao){
-            batch.draw(botao_menu_variante_textura, 640, 435);
+        if(botao_menu_jogar_verifcacao){
+            batch.draw(botao_menu_jogar_variante_textura, (450 - botao_menu_jogar_variante_textura.getWidth()), 435);
         }
         else {
-            batch.draw(botao_menu_textura, 640, 435);
+            batch.draw(botao_menu_jogar_textura, (450 - botao_menu_jogar_textura.getWidth()), 435);
         }
 
-        batch.draw(disparo_textura, mouse_retangulo.getX(), mouse_retangulo.getY());
-
+        if(botao_menu_sair_verifcacao){
+            batch.draw(botao_menu_sair_variante_textura, (720 + botao_menu_sair_variante_textura.getWidth()), 435);
+        }
+        else {
+            batch.draw(botao_menu_sair_textura, (720 + botao_menu_sair_textura.getWidth()), 435);
+        }
         batch.end();
     }
     //Função responsável por desenhar o jogo
@@ -312,6 +390,25 @@ public class Main extends ApplicationAdapter {
             batch.draw(inimigo_frame, inimigo_lista.get(i).getX(), inimigo_lista.get(i).getY());
         }
         //Desenhando o inimigo
+
+        //Desenhando os ícones
+        if (baratas_fuga == 1){
+            batch.draw(tela_fase_icone_barata_vida, 20, 650);
+        } else if (baratas_fuga == 2) {
+            batch.draw(tela_fase_icone_barata_vida, 20, 650);
+            batch.draw(tela_fase_icone_barata_vida, 100, 650);
+        }else if (baratas_fuga == 3){
+            batch.draw(tela_fase_icone_barata_vida, 20, 650);
+            batch.draw(tela_fase_icone_barata_vida, 100, 650);
+            batch.draw(tela_fase_icone_barata_vida, 180, 650);
+        }
+
+        batch.draw(tela_fase_icone_barata_ponto, 20, 735);
+        //Desenhando os ícones
+
+        //Desenhando a pontuação
+        fonte_bitmap.draw(batch, ":  "+pontuacao_baratas, 100, Gdx.graphics.getHeight() - 20);
+        //Desenhando a pontuação
         batch.end();
     }
     //Função responsável por desenhar o jogo
@@ -339,6 +436,4 @@ public class Main extends ApplicationAdapter {
         }
     }
     //Função responsável por criar o disparo do jogador
-
-    //heitor viado
 }
