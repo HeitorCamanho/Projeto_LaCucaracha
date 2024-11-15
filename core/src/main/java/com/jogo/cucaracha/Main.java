@@ -88,6 +88,7 @@ public class Main extends ApplicationAdapter {
     public Sound disparo_som;
     public Sound inimigo_som_colisao_disparo;
     public Sound inimigo_som_colisao_jogador;
+    public Sound inimigo_som_vitoria;
 
     public Music tela_fase_som;
     public Music tela_menu_som;
@@ -123,6 +124,7 @@ public class Main extends ApplicationAdapter {
         botao_menu_jogar_verifcacao = false;
         botao_menu_sair_verifcacao = false;
 
+        inimigo_som_vitoria = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_vitoria.mp3"));
         inimigo_som_colisao_jogador = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_jogador.mp3"));
         inimigo_som_colisao_disparo = Gdx.audio.newSound(Gdx.files.internal("Inimigo/som_inimigo_colisao.mp3"));
         inimigo_textura = new Texture("Inimigo/img_textura.png");
@@ -295,6 +297,7 @@ public class Main extends ApplicationAdapter {
             if (inimigo_movimento.getX() < -inimigo_movimento_largura) {
                 inimigo_lista.removeIndex(i);
                 --baratas_fuga;
+                inimigo_som_vitoria.play();
                 if(baratas_fuga <= -1){
                     inimigo_lista.clear();
                     disparo_tempo_geracao = 0;
