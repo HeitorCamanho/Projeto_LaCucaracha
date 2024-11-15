@@ -21,7 +21,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.jogo.cucaracha.Personagem.Inimigo;
 import com.jogo.cucaracha.Personagem.Jogador;
 
-
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
     public SpriteBatch batch;
@@ -42,6 +41,8 @@ public class Main extends ApplicationAdapter {
     public Texture tela_fase_fundo_textura;
     public Texture tela_menu_fundo_textura;
     public Texture tela_menu_mouse;
+    public Texture tela_fase_icone_barata_vida;
+    public Texture tela_fase_icone_barata_ponto;
 
     public TextureRegion[][] tela_fase_fundo_temp;
     public TextureRegion[] tela_fase_fundo_frames;
@@ -144,6 +145,8 @@ public class Main extends ApplicationAdapter {
         disparo_verifcacao = false;
         disparo_movimento = new Vector2(0, 0);
 
+        tela_fase_icone_barata_ponto = new Texture("Telas/Fase/img_barata_ponto.png");
+        tela_fase_icone_barata_vida = new Texture("Telas/Fase/img_barata_vida.png");
         tela_fase_som = Gdx.audio.newMusic(Gdx.files.internal("Telas/Fase/som_tela_fase.mp3"));
         tela_fase_fundo_textura = new Texture("Telas/Fase/img_fundo_fase_sheet.png");
         tela_fase_fundo_temp = TextureRegion.split(tela_fase_fundo_textura, tela_fase_fundo_textura.getWidth() / tela_fase_fundo_colunas, tela_fase_fundo_textura.getHeight() / tela_fase_fundo_linhas);
@@ -203,6 +206,7 @@ public class Main extends ApplicationAdapter {
 
         if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
             if(botao_menu_jogar_verifcacao){
+                baratas_fuga = 3;
                 dipose_verificacao = true;
                 cenario = 2;
             }
@@ -295,7 +299,6 @@ public class Main extends ApplicationAdapter {
                     inimigo_lista.clear();
                     disparo_tempo_geracao = 0;
                     disparo_verifcacao = false;
-                    baratas_fuga = 3;
                     cenario = 1;
                     break;
                 }
@@ -385,8 +388,23 @@ public class Main extends ApplicationAdapter {
         }
         //Desenhando o inimigo
 
+        //Desenhando os ícones
+        if (baratas_fuga == 1){
+            batch.draw(tela_fase_icone_barata_vida, 20, 650);
+        } else if (baratas_fuga == 2) {
+            batch.draw(tela_fase_icone_barata_vida, 20, 650);
+            batch.draw(tela_fase_icone_barata_vida, 100, 650);
+        }else if (baratas_fuga == 3){
+            batch.draw(tela_fase_icone_barata_vida, 20, 650);
+            batch.draw(tela_fase_icone_barata_vida, 100, 650);
+            batch.draw(tela_fase_icone_barata_vida, 180, 650);
+        }
+
+        batch.draw(tela_fase_icone_barata_ponto, 20, 735);
+        //Desenhando os ícones
+
         //Desenhando a pontuação
-        fonte_bitmap.draw(batch, ":  "+pontuacao_baratas, 20, Gdx.graphics.getHeight() - 20);
+        fonte_bitmap.draw(batch, ":  "+pontuacao_baratas, 100, Gdx.graphics.getHeight() - 20);
         //Desenhando a pontuação
         batch.end();
     }
